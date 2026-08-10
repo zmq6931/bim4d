@@ -1,44 +1,48 @@
 @echo off
-chcp 65001 >nul
-title BIM 4D 模拟软件
+title BIM 4D Simulation
 
 echo ============================================================
-echo   BIM 4D 模拟软件 - 启动脚本
+echo   BIM 4D Simulation - Starting...
 echo ============================================================
 echo.
 
-REM ---- 进入后端目录 ----
+REM ---- Enter backend directory ----
 cd /d "%~dp0backend"
 
-REM ---- 检查 Python ----
+REM ---- Check Python ----
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo [错误] 未检测到 Python，请先安装 Python 3.10+
+    echo [ERROR] Python not found. Please install Python 3.10+
+    echo Download: https://www.python.org/downloads/
     pause
     exit /b 1
 )
 
-REM ---- 安装依赖（首次运行）----
+echo [INFO] Python found.
+
+REM ---- Install dependencies (first run only) ----
 if not exist ".deps_installed" (
-    echo [初始化] 首次运行，正在安装依赖...
+    echo [INFO] First run - installing dependencies...
     python -m pip install -r requirements.txt
     if errorlevel 1 (
         echo.
-        echo [错误] 依赖安装失败，请检查网络或手动运行：
+        echo [ERROR] Dependency install failed. Try manually:
+        echo   cd backend
         echo   python -m pip install -r requirements.txt
         pause
         exit /b 1
     )
     echo done > ".deps_installed"
-    echo [初始化] 依赖安装完成！
+    echo [INFO] Dependencies installed!
     echo.
 )
 
-REM ---- 启动服务 ----
-echo [启动] 后端服务启动中...
-echo [启动] 浏览器请访问: http://localhost:8000
+REM ---- Start server ----
+echo [INFO] Starting server at http://localhost:8000
+echo [INFO] Press Ctrl+C to stop.
 echo.
-start /b "" cmd /c "timeout /t 3 >nul && start http://localhost:8000"
+
+start http://localhost:8000
 python main.py
 
 pause
