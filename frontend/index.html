@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIM 4D Simulation</title>
+
+    <!-- Three.js (ES Module via importmap, 本地 vendor) -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "/app/vendor/three.module.js",
+            "three/addons/controls/OrbitControls.js": "/app/vendor/OrbitControls.js"
+        }
+    }
+    </script>
+
+    <!-- dhtmlxGantt (GPL v7, 本地 vendor) -->
+    <link rel="stylesheet" href="/app/vendor/dhtmlxgantt.css">
+    <script src="/app/vendor/dhtmlxgantt.js"></script>
+
+    <link rel="stylesheet" href="/app/css/style.css?v=12">
+</head>
+<body>
+
+<!-- ======================= 顶部工具栏 ======================= -->
+<header id="toolbar">
+    <div class="logo">🏗️ BIM 4D</div>
+
+    <div class="toolbar-group">
+        <button id="btnUploadIfc" class="btn">📁 Import IFC</button>
+        <input type="file" id="ifcFileInput" accept=".ifc,.ifcxml,.ifczip" hidden>
+
+        <button id="btnUploadXer" class="btn">📅 Import XER</button>
+        <input type="file" id="xerFileInput" accept=".xer" hidden">
+    </div>
+
+    <div class="toolbar-group">
+        <button id="btnAutoLink" class="btn btn-secondary" disabled>🔗 Auto Link</button>
+        <button id="btnManualLink" class="btn btn-secondary" disabled>✋ Manual Link</button>
+        <button id="btnClearLinks" class="btn btn-secondary" disabled>🗑️ Clear Links</button>
+        <button id="btnSaveProject" class="btn btn-secondary" disabled>💾 Save</button>
+        <button id="btnLoadProject" class="btn btn-secondary">📂 Load</button>
+    </div>
+
+    <div class="toolbar-group">
+        <span class="status-pill" id="ifcStatus">IFC: Not loaded</span>
+        <span class="status-pill" id="xerStatus">XER: Not loaded</span>
+        <span class="status-pill" id="linkStatus">Links: 0</span>
+    </div>
+</header>
+
+<!-- ======================= 主区域：左 3D / 右 甘特图 ======================= -->
+<main id="main-area">
+    <!-- 左侧：3D 视图 -->
+    <section id="viewer-panel">
+        <div id="viewer-header">
+            <span>3D View</span>
+            <span id="selection-indicator" style="font-size:11px;color:var(--text-dim);margin-left:8px;"></span>
+            <div class="viewer-controls">
+                <button id="btnToggleTree" class="btn-small" title="Model Tree">🌳</button>
+                <label class="legend"><span class="dot dot-done"></span>Done</label>
+                <label class="legend"><span class="dot dot-active"></span>Active</label>
+                <label class="legend"><span class="dot dot-pending"></span>Pending</label>
+                <label class="legend"><span class="dot dot-unlinked"></span>Unlinked</label>
+                <button id="btnBoxSelect" class="btn-small" title="Box Select">⬡ Box</button>
+                <button id="btnShowAll" class="btn-small" title="Show All">👁 Show All</button>
+                <button id="btnHideSelected" class="btn-small" title="Hide Selected">🙈 Hide</button>
+                <button id="btnUnlinkSelected" class="btn-small" title="Unlink Selected">🔓 Unlink</button>
+                <button id="btnColorSettings" class="btn-small" title="Color Settings">🎨</button>
+                <button id="btnFitView" class="btn-small" title="Fit View">⤢</button>
+            </div>
+        </div>
+        <div id="viewer-container"></div>
+        <div id="viewer-hint" class="hint-box">
+            Import an IFC file to display the 3D model
+        </div>
+
+        <!-- Model Tree Panel -->
+        <div id="model-tree-panel" class="tree-panel hidden">
+            <div class="tree-panel-header">
+            <span>📂 Model Tree</span>
+            <div class="tree-actions">
+                <button id="btnExpandAll" class="btn-tiny" title="Expand All">⊞</button>
+                <button id="btnCollapseAll" class="btn-tiny" title="Collapse All">⊟</button>
+                <button id="btnShowAll" class="btn-tiny" title="Show All">👁</button>
+                <button id="btnHideAll" class="btn-tiny" title="Hide All">—</button>
+                <button id="btnCloseTree" class="btn-tiny" title="Close Tree" style="margin-left:4px;font-weight:bold;">✕</button>
+            </div>
+            </div>
+            <div id="model-tree" class="tree-body"></div>
+        </div>
+    </section>
+
+    <!-- Right: Gantt Chart -->
+    <section id="gantt-panel">
+        <div id="gantt-header">Schedule (Gantt)</div>
+        <div id="gantt-container">
+            <div class="hint-box" style="margin:20px;">Import an XER file to display the schedule</div>
+        </div>
+    </section>
+</main>
+
+<!-- ======================= 底部：关联面板 + 时间轴 ======================= -->
+<footer id="bottom-panel">
+    <!-- Link Hint Bar -->
+    <div id="link-hint-bar" class="hidden">
+        <span id="linkHintText">Link Mode: Select a task, then pick elements in 3D or Tree</span>
+        <button id="btnFinishLink" class="btn btn-primary">✓ Confirm</button>
+        <button id="btnCancelLink" class="btn">Cancel</button>
+    </div>
+
+    <!-- Auto-link Suggestions -->
+    <div id="auto-link-panel" class="hidden">
+        <div class="auto-link-header">
+            <span>Auto-link suggestions (<b id="suggestionCount">0</b> total)</span>
+            <div>
+                <button id="btnApplyAllSuggestions" class="btn btn-primary">Apply All</button>
+                <button id="btnCloseSuggestions" class="btn">Close</button>
+            </div>
+        </div>
+        <div id="suggestion-list"></div>
+    </div>
+
+    <!-- Timeline -->
+    <div id="timeline-bar">
+        <button id="btnStepBack" class="btn-timeline" title="Step Back">◀</button>
+        <button id="btnPlay" class="btn-play" title="Play/Pause">▶</button>
+        <button id="btnStop" class="btn-timeline" title="Stop">⏹</button>
+        <button id="btnStepForward" class="btn-timeline" title="Step Forward">▶</button>
+
+        <div class="slider-wrap">
+            <input type="range" id="dateSlider" min="0" max="100" value="0">
+        </div>
+
+        <span id="currentDate" class="date-display">Not loaded</span>
+
+        <label class="speed-label">Speed:
+            <select id="speedSelect">
+                <option value="2000">0.5 day/s</option>
+                <option value="1000" selected>1 day/s</option>
+                <option value="500">2 day/s</option>
+                <option value="200">5 day/s</option>
+                <option value="50">20 day/s</option>
+            </select>
+        </label>
+
+        <label class="speed-label">Sim Start:
+            <input type="date" id="simStartDate" style="background:var(--bg-panel-light);color:var(--text);border:1px solid var(--border);padding:2px 6px;border-radius:3px;font-size:12px;width:120px;">
+        </label>
+    </div>
+</footer>
+
+<!-- Toast -->
+<div id="toast" class="toast hidden"></div>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay" class="loading-overlay hidden">
+    <div class="spinner"></div>
+    <div id="loadingText">Processing...</div>
+</div>
+
+<!-- Color Panel -->
+<div id="color-panel" class="color-panel hidden">
+    <div class="color-panel-header">🎨 State Colors</div>
+    <div id="color-rows"></div>
+    <div style="padding:8px;display:flex;gap:8px;justify-content:flex-end;">
+        <button id="btnResetColors" class="btn btn-secondary">Reset</button>
+        <button id="btnApplyColors" class="btn btn-primary">Apply</button>
+    </div>
+</div>
+
+<!-- ======================= 脚本 ======================= -->
+<script src="/app/js/gantt.js?cb=EN3"></script>
+<script src="/app/js/simulator.js?cb=EN1"></script>
+<script src="/app/js/linker.js?cb=EN1"></script>
+<script src="/app/js/tree.js?cb=EN1"></script>
+<script src="/app/js/viewer.js?cb=EN1"></script>
+<script src="/app/js/app.js?cb=EN3"></script>
+
+</body>
+</html>

@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Backend
+.deps_installed
+backend/uploads/
+
+# Node (vendor libs — re-install via npm)
+node_dl/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test data (user-generated)
+test_data/*.ifc
+test_data/*.xer
+test_data/*.bim4d
+
+# Project save files
+*.bim4d
