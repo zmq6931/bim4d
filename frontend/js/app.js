@@ -273,7 +273,7 @@ class BIMApp {
             BIMTree.expandAll();
         document.getElementById("btnCollapseAll").onclick = () =>
             BIMTree.collapseAll();
-        document.getElementById("btnShowAll").onclick = () =>
+        document.getElementById("btnTreeShowAll").onclick = () =>
             BIMTree.showAll();
         document.getElementById("btnHideAll").onclick = () =>
             BIMTree.hideAll();

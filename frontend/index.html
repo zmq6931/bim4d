@@ -19,34 +19,63 @@
     <link rel="stylesheet" href="/app/vendor/dhtmlxgantt.css">
     <script src="/app/vendor/dhtmlxgantt.js"></script>
 
-    <link rel="stylesheet" href="/app/css/style.css?v=16">
+    <link rel="stylesheet" href="/app/css/style.css?v=17">
 </head>
 <body>
 
-<!-- ======================= 顶部工具栏 ======================= -->
+<!-- ======================= 顶部命令栏 ======================= -->
 <header id="toolbar">
-    <div class="logo">🏗️ BIM 4D</div>
+    <div class="toolbar-row">
+        <div class="logo">🏗️ BIM 4D</div>
 
-    <div class="toolbar-group">
-        <button id="btnUploadIfc" class="btn">📁 Import IFC</button>
-        <input type="file" id="ifcFileInput" accept=".ifc,.ifcxml,.ifczip" hidden>
+        <div class="toolbar-group">
+            <button id="btnUploadIfc" class="btn">📁 Import IFC</button>
+            <input type="file" id="ifcFileInput" accept=".ifc,.ifcxml,.ifczip" hidden>
 
-        <button id="btnUploadXer" class="btn">📅 Import XER</button>
-        <input type="file" id="xerFileInput" accept=".xer" hidden">
+            <button id="btnUploadXer" class="btn">📅 Import XER</button>
+            <input type="file" id="xerFileInput" accept=".xer" hidden">
+        </div>
+
+        <div class="toolbar-group">
+            <button id="btnAutoLink" class="btn btn-secondary" disabled>🔗 Auto Link</button>
+            <button id="btnManualLink" class="btn btn-secondary" disabled>✋ Manual Link</button>
+            <button id="btnClearLinks" class="btn btn-secondary" disabled>🗑️ Clear Links</button>
+            <button id="btnSaveProject" class="btn btn-secondary" disabled>💾 Save</button>
+            <button id="btnLoadProject" class="btn btn-secondary">📂 Load</button>
+        </div>
+
+        <div class="toolbar-group">
+            <span class="status-pill" id="ifcStatus">IFC: Not loaded</span>
+            <span class="status-pill" id="xerStatus">XER: Not loaded</span>
+            <span class="status-pill" id="linkStatus">Links: 0</span>
+        </div>
     </div>
 
-    <div class="toolbar-group">
-        <button id="btnAutoLink" class="btn btn-secondary" disabled>🔗 Auto Link</button>
-        <button id="btnManualLink" class="btn btn-secondary" disabled>✋ Manual Link</button>
-        <button id="btnClearLinks" class="btn btn-secondary" disabled>🗑️ Clear Links</button>
-        <button id="btnSaveProject" class="btn btn-secondary" disabled>💾 Save</button>
-        <button id="btnLoadProject" class="btn btn-secondary">📂 Load</button>
-    </div>
+    <div class="toolbar-row">
+        <div class="toolbar-group" id="viewer-commands">
+            <span class="toolbar-label">3D View</span>
+            <button id="btnToggleTree" class="btn-small" title="Model Tree">🌳</button>
+            <button id="btnBoxSelect" class="btn-small" title="Box Select">⬡ Box</button>
+            <button id="btnShowAll" class="btn-small" title="Show All">👁 Show All</button>
+            <button id="btnHideSelected" class="btn-small" title="Hide Selected">🙈 Hide</button>
+            <button id="btnUnlinkSelected" class="btn-small" title="Unlink Selected">🔓 Unlink</button>
+            <button id="btnColorSettings" class="btn-small" title="Color Settings">🎨</button>
+            <button id="btnFitView" class="btn-small" title="Fit View">⤢</button>
+            <span id="selection-indicator"></span>
+            <span class="toolbar-sep"></span>
+            <label class="legend"><span class="dot dot-done"></span>Done</label>
+            <label class="legend"><span class="dot dot-active"></span>Active</label>
+            <label class="legend"><span class="dot dot-pending"></span>Pending</label>
+            <label class="legend"><span class="dot dot-unlinked"></span>Unlinked</label>
+        </div>
 
-    <div class="toolbar-group">
-        <span class="status-pill" id="ifcStatus">IFC: Not loaded</span>
-        <span class="status-pill" id="xerStatus">XER: Not loaded</span>
-        <span class="status-pill" id="linkStatus">Links: 0</span>
+        <div class="toolbar-group" id="schedule-commands">
+            <span class="toolbar-label">Schedule (Gantt)</span>
+            <button id="btnZoomDay" class="btn-tiny" title="Day view">Day</button>
+            <button id="btnZoomWeek" class="btn-tiny" title="Week view">Week</button>
+            <button id="btnZoomMonth" class="btn-tiny" title="Month view">Month</button>
+            <button id="btnZoomYear" class="btn-tiny" title="Year view">Year</button>
+        </div>
     </div>
 </header>
 
@@ -54,23 +83,6 @@
 <main id="main-area">
     <!-- 左侧：3D 视图 -->
     <section id="viewer-panel">
-        <div id="viewer-header">
-            <span>3D View</span>
-            <span id="selection-indicator" style="font-size:11px;color:var(--text-dim);margin-left:8px;"></span>
-            <div class="viewer-controls">
-                <button id="btnToggleTree" class="btn-small" title="Model Tree">🌳</button>
-                <label class="legend"><span class="dot dot-done"></span>Done</label>
-                <label class="legend"><span class="dot dot-active"></span>Active</label>
-                <label class="legend"><span class="dot dot-pending"></span>Pending</label>
-                <label class="legend"><span class="dot dot-unlinked"></span>Unlinked</label>
-                <button id="btnBoxSelect" class="btn-small" title="Box Select">⬡ Box</button>
-                <button id="btnShowAll" class="btn-small" title="Show All">👁 Show All</button>
-                <button id="btnHideSelected" class="btn-small" title="Hide Selected">🙈 Hide</button>
-                <button id="btnUnlinkSelected" class="btn-small" title="Unlink Selected">🔓 Unlink</button>
-                <button id="btnColorSettings" class="btn-small" title="Color Settings">🎨</button>
-                <button id="btnFitView" class="btn-small" title="Fit View">⤢</button>
-            </div>
-        </div>
         <div id="viewer-container"></div>
         <div id="viewer-hint" class="hint-box">
             Import an IFC file to display the 3D model
@@ -83,7 +95,7 @@
             <div class="tree-actions">
                 <button id="btnExpandAll" class="btn-tiny" title="Expand All">⊞</button>
                 <button id="btnCollapseAll" class="btn-tiny" title="Collapse All">⊟</button>
-                <button id="btnShowAll" class="btn-tiny" title="Show All">👁</button>
+                <button id="btnTreeShowAll" class="btn-tiny" title="Show All">👁</button>
                 <button id="btnHideAll" class="btn-tiny" title="Hide All">—</button>
                 <button id="btnCloseTree" class="btn-tiny" title="Close Tree" style="margin-left:4px;font-weight:bold;">✕</button>
             </div>
@@ -97,15 +109,6 @@
 
     <!-- Right: Gantt Chart -->
     <section id="gantt-panel">
-        <div id="gantt-header">
-            <span>Schedule (Gantt)</span>
-            <div style="margin-left:auto;display:flex;gap:3px;">
-                <button id="btnZoomDay" class="btn-tiny" title="Day view">Day</button>
-                <button id="btnZoomWeek" class="btn-tiny" title="Week view">Week</button>
-                <button id="btnZoomMonth" class="btn-tiny" title="Month view">Month</button>
-                <button id="btnZoomYear" class="btn-tiny" title="Year view">Year</button>
-            </div>
-        </div>
         <div id="gantt-container">
             <div class="hint-box" style="margin:20px;">Import an XER file to display the schedule</div>
         </div>
@@ -187,7 +190,7 @@
 <script src="/app/js/linker.js?cb=EN1"></script>
 <script src="/app/js/tree.js?cb=EN1"></script>
 <script src="/app/js/viewer.js?cb=EN1"></script>
-<script src="/app/js/app.js?cb=EN6"></script>
+<script src="/app/js/app.js?cb=EN7"></script>
 
 </body>
 </html>

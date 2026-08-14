@@ -38,17 +38,79 @@ body {
     flex-direction: column;
 }
 
-/* ===================== 顶部工具栏 ===================== */
+/* ===================== 顶部命令栏 ===================== */
 #toolbar {
-    height: 52px;
     background: var(--bg-panel);
     border-bottom: 1px solid var(--border);
     display: flex;
-    align-items: center;
-    padding: 0 16px;
-    gap: 20px;
+    flex-direction: column;
+    padding: 6px 16px;
+    gap: 6px;
     flex-shrink: 0;
 }
+
+.toolbar-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.toolbar-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    white-space: nowrap;
+}
+
+.toolbar-sep {
+    width: 1px;
+    height: 18px;
+    background: var(--border);
+    margin: 0 2px;
+}
+
+#viewer-commands {
+    min-width: 0;
+    gap: 6px;
+    row-gap: 2px;
+    flex-wrap: wrap;
+}
+
+#schedule-commands {
+    margin-left: auto;
+    gap: 6px;
+    row-gap: 2px;
+    flex-wrap: wrap;
+}
+
+#selection-indicator {
+    font-size: 11px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 260px;
+}
+
+.legend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-dim);
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+.dot-done { background: var(--green); }
+.dot-active { background: var(--yellow); }
+.dot-pending { background: transparent; border: 1.5px dashed var(--gray); }
+.dot-unlinked { background: var(--gray); opacity: 0.4; }
 
 .logo {
     font-size: 16px;
@@ -157,42 +219,6 @@ body {
     border-color: #4a9eff;
 }
 
-#viewer-header {
-    height: 36px;
-    background: var(--bg-panel);
-    padding: 0 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-    color: var(--text-dim);
-}
-
-.viewer-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.legend {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-}
-
-.dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-}
-.dot-done { background: var(--green); }
-.dot-active { background: var(--yellow); }
-.dot-pending { background: transparent; border: 1.5px dashed var(--gray); }
-.dot-unlinked { background: var(--gray); opacity: 0.4; }
-
 #viewer-container {
     flex: 1;
     position: relative;
@@ -221,17 +247,6 @@ body {
     display: flex;
     flex-direction: column;
     min-width: 0;
-}
-
-#gantt-header {
-    height: 36px;
-    background: var(--bg-panel);
-    padding: 0 12px;
-    display: flex;
-    align-items: center;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-    color: var(--text-dim);
 }
 
 #gantt-container {
@@ -324,12 +339,12 @@ body {
     text-overflow: ellipsis;
 }
 
-/* Gantt 头部缩放按钮：按文字自适应宽度 + 当前级别高亮 */
-#gantt-header .btn-tiny {
+/* 缩放按钮：按文字自适应宽度 + 当前级别高亮 */
+#schedule-commands .btn-tiny {
     width: auto;
     padding: 0 8px;
 }
-#gantt-header .btn-tiny.active {
+#schedule-commands .btn-tiny.active {
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
