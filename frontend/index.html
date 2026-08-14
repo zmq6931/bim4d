@@ -19,7 +19,7 @@
     <link rel="stylesheet" href="/app/vendor/dhtmlxgantt.css">
     <script src="/app/vendor/dhtmlxgantt.js"></script>
 
-    <link rel="stylesheet" href="/app/css/style.css?v=12">
+    <link rel="stylesheet" href="/app/css/style.css?v=16">
 </head>
 <body>
 
@@ -92,9 +92,20 @@
         </div>
     </section>
 
+    <!-- 3D / Schedule 面板分隔条（拖动调整两侧宽度） -->
+    <div id="panel-splitter" title="拖动调整 3D / Schedule 宽度"></div>
+
     <!-- Right: Gantt Chart -->
     <section id="gantt-panel">
-        <div id="gantt-header">Schedule (Gantt)</div>
+        <div id="gantt-header">
+            <span>Schedule (Gantt)</span>
+            <div style="margin-left:auto;display:flex;gap:3px;">
+                <button id="btnZoomDay" class="btn-tiny" title="Day view">Day</button>
+                <button id="btnZoomWeek" class="btn-tiny" title="Week view">Week</button>
+                <button id="btnZoomMonth" class="btn-tiny" title="Month view">Month</button>
+                <button id="btnZoomYear" class="btn-tiny" title="Year view">Year</button>
+            </div>
+        </div>
         <div id="gantt-container">
             <div class="hint-box" style="margin:20px;">Import an XER file to display the schedule</div>
         </div>
@@ -171,12 +182,12 @@
 </div>
 
 <!-- ======================= 脚本 ======================= -->
-<script src="/app/js/gantt.js?cb=EN3"></script>
+<script src="/app/js/gantt.js?cb=EN7"></script>
 <script src="/app/js/simulator.js?cb=EN1"></script>
 <script src="/app/js/linker.js?cb=EN1"></script>
 <script src="/app/js/tree.js?cb=EN1"></script>
 <script src="/app/js/viewer.js?cb=EN1"></script>
-<script src="/app/js/app.js?cb=EN3"></script>
+<script src="/app/js/app.js?cb=EN6"></script>
 
 </body>
 </html>

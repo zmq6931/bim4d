@@ -35,9 +35,83 @@ class BIMApp {
 
         this._bindEvents();
         this._bindModules();
+        this._initPanelSplitter();
 
         // 检查已有状态（刷新页面后）
         await this._checkStatus();
+    }
+
+    /**
+     * 3D 视图 / Schedule 面板分隔条：拖动调整两侧宽度，并持久化到 localStorage
+     */
+    _initPanelSplitter() {
+        const main = document.getElementById("main-area");
+        const viewer = document.getElementById("viewer-panel");
+        const splitter = document.getElementById("panel-splitter");
+        if (!main || !viewer || !splitter) return;
+
+        const MIN_VIEWER = 280; // 3D 视图最小宽度
+        const MIN_GANTT = 360;  // Schedule 最小宽度
+        const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+        const maxViewer = () => Math.max(MIN_VIEWER, main.clientWidth - MIN_GANTT - splitter.offsetWidth);
+
+        const applyWidth = (w) => {
+            viewer.style.flex = "0 0 " + w + "px";
+        };
+        const currentWidth = () => parseFloat(viewer.style.flexBasis) || 0;
+        const refreshViewer = () => {
+            // 3D 画布跟随容器尺寸
+            if (window.BIMViewer && BIMViewer.renderer && BIMViewer.camera && typeof BIMViewer._onResize === "function") {
+                try { BIMViewer._onResize(); } catch (e) { /* ignore */ }
+            }
+        };
+
+        // 恢复上次保存的宽度
+        let saved = null;
+        try {
+            const s = parseInt(localStorage.getItem("bim4d_panel_split_width") || "", 10);
+            if (s >= MIN_VIEWER) saved = s;
+        } catch (e) { /* ignore */ }
+        if (saved !== null) {
+            applyWidth(clamp(saved, MIN_VIEWER, maxViewer()));
+            refreshViewer();
+        }
+
+        // 窗口变化时保证最小宽度
+        window.addEventListener("resize", () => {
+            const w = currentWidth();
+            if (w > 0) applyWidth(clamp(w, MIN_VIEWER, maxViewer()));
+            refreshViewer();
+        });
+
+        let dragging = false;
+        let pendingRaf = 0;
+        let latestW = 0;
+        splitter.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            dragging = true;
+            splitter.classList.add("dragging");
+        });
+        document.addEventListener("mousemove", (e) => {
+            if (!dragging) return;
+            const rect = main.getBoundingClientRect();
+            latestW = clamp(e.clientX - rect.left - splitter.offsetWidth / 2, MIN_VIEWER, maxViewer());
+            if (pendingRaf) return;
+            pendingRaf = requestAnimationFrame(() => {
+                pendingRaf = 0;
+                applyWidth(latestW);
+                refreshViewer();
+            });
+        });
+        document.addEventListener("mouseup", () => {
+            if (!dragging) return;
+            dragging = false;
+            splitter.classList.remove("dragging");
+            try {
+                const w = currentWidth();
+                if (w > 0) localStorage.setItem("bim4d_panel_split_width", String(Math.round(w)));
+            } catch (e) { /* ignore */ }
+        });
     }
 
     _bindEvents() {
@@ -86,6 +160,21 @@ class BIMApp {
             BIMLinker.confirmLinks();
         document.getElementById("btnCancelLink").onclick = () =>
             BIMLinker.exitLinkMode();
+
+        // Gantt zoom level buttons (Day / Week / Month / Year)
+        const zoomLevels = ["Day", "Week", "Month", "Year"];
+        const applyZoomActive = (name) => {
+            zoomLevels.forEach((n) => {
+                const btn = document.getElementById("btnZoom" + n);
+                if (btn) btn.classList.toggle("active", n === name);
+            });
+        };
+        zoomLevels.forEach((n) => {
+            const btn = document.getElementById("btnZoom" + n);
+            if (btn) btn.onclick = () => BIMGantt.setZoomLevel(n);
+        });
+        BIMGantt.onZoomChange(applyZoomActive);
+        applyZoomActive(BIMGantt.getZoomLevel());
 
         // 视图
         document.getElementById("btnFitView").onclick = () =>

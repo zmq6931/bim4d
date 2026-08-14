@@ -136,6 +136,27 @@ body {
     position: relative;
 }
 
+/* 3D / Schedule 之间的可拖动分隔条 */
+#panel-splitter {
+    flex-shrink: 0;
+    width: 8px;
+    cursor: col-resize;
+    background: #dcdcdc;
+    border-left: 1px solid #c6c6c6;
+    border-right: 1px solid #c6c6c6;
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background-color 0.15s;
+    position: relative;
+    z-index: 30;
+}
+#panel-splitter:hover,
+#panel-splitter.dragging {
+    background: #4a9eff;
+    border-color: #4a9eff;
+}
+
 #viewer-header {
     height: 36px;
     background: var(--bg-panel);
@@ -217,6 +238,7 @@ body {
     flex: 1;
     overflow: auto;
     background: #f0f0f0;
+    position: relative;
 }
 
 /* dhtmlxGantt styling */
@@ -272,6 +294,45 @@ body {
 }
 #gantt-container .gantt_task_cell {
     color: #000;
+}
+
+/* 任务列表与时间轴之间的可拖动分隔条（自建把手） */
+#gantt-container .gantt_split_resizer {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    background: #dcdcdc;
+    border-left: 1px solid #c6c6c6;
+    border-right: 1px solid #c6c6c6;
+    box-sizing: border-box;
+    cursor: col-resize;
+    z-index: 20;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: background-color 0.15s;
+}
+#gantt-container .gantt_split_resizer:hover,
+#gantt-container .gantt_split_resizer.dragging {
+    background: #4a9eff;
+    border-color: #4a9eff;
+}
+
+/* 任务名过长时显示省略号（完整名称见鼠标悬停提示） */
+#gantt-container .gantt_tree_content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Gantt 头部缩放按钮：按文字自适应宽度 + 当前级别高亮 */
+#gantt-header .btn-tiny {
+    width: auto;
+    padding: 0 8px;
+}
+#gantt-header .btn-tiny.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
 }
 
 /* ===================== 底部面板 ===================== */
